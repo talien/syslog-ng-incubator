@@ -88,6 +88,7 @@ dnl ***************************************************************************
 
 PKG_CHECK_MODULES(SYSLOG_NG, syslog-ng >= $SYSLOG_NG_MIN_VERSION)
 PKG_CHECK_MODULES(EVENTLOG, eventlog >= $EVENTLOG_MIN_VERSION)
+PKG_CHECK_MODULES(SYSLOG_NG_TEST, syslog-ng-test,enable_tests=yes,enable_tests=no)
 
 if test "x$with_ivykis" != "xno"; then
    PKG_CHECK_MODULES(IVYKIS, ivykis >= $IVYKIS_MIN_VERSION,,true)
@@ -167,6 +168,7 @@ AM_CONDITIONAL(ENABLE_RIEMANN, [test "$enable_riemann" != "no"])
 AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 AM_CONDITIONAL(ENABLE_PERL, [test "$enable_perl" != "no"])
 AM_CONDITIONAL(ENABLE_PYTHON, [test "$enable_python" != "no"])
+AM_CONDITIONAL(ENABLE_TESTS,[test "$enable_tests" == "yes"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
