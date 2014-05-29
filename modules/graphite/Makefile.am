@@ -20,3 +20,6 @@ modules/graphite mod-graphite: modules/graphite/libgraphite.la
 
 .PHONY: modules/graphite mod-graphite
 
+if ENABLE_TESTS
+include modules/graphite/tests/Makefile.am
+endif
