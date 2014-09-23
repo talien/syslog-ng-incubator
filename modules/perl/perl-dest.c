@@ -246,8 +246,8 @@ perl_worker_vp_add_one(const gchar *name,
 
 /** Main code **/
 
-static void
-_perl_thread_init(LogThrDestDriver *d)
+static gboolean 
+_perl_interpreter_init(LogThrDestDriver *d)
 {
   PerlDestDriver *self = (PerlDestDriver *)d;
   PerlInterpreter *my_perl;
@@ -257,10 +257,15 @@ _perl_thread_init(LogThrDestDriver *d)
   perl_construct(self->perl);
   my_perl = self->perl;
   PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
-  perl_parse(self->perl, xs_init, 2, (char **)argv, NULL);
+  if (perl_parse(self->perl, xs_init, 2, (char **)argv, NULL))
+    return FALSE;
+  return TRUE;
+};
 
-  if (!self->queue_func_name)
-    self->queue_func_name = g_strdup("queue");
+static void
+_perl_thread_init(LogThrDestDriver *d)
+{
+  PerlDestDriver *self = (PerlDestDriver *)d;
 
   if (self->init_func_name)
     _call_perl_function_with_no_arguments(self, self->init_func_name);
@@ -283,6 +288,8 @@ perl_worker_eval(LogThrDestDriver *d)
   HV *kvmap;
   gpointer args[3];
   dSP;
+
+  PERL_SET_CONTEXT(self->perl);
 
   success = log_queue_pop_head(self->super.queue, &msg, &path_options, FALSE, FALSE);
   if (!success)
@@ -387,6 +394,16 @@ perl_worker_init(LogPipe *d)
     return FALSE;
 
   log_template_options_init(&self->template_options, cfg);
+
+  if (!self->queue_func_name)
+    self->queue_func_name = g_strdup("queue");
+
+  if (!_perl_interpreter_init(&self->super))
+     {
+        perl_destruct(self->perl);
+        perl_free(self->perl);
+        return FALSE;
+     }
 
   return log_threaded_dest_driver_start(d);
 }
