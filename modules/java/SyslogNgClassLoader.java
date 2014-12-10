@@ -53,6 +53,8 @@ public class SyslogNgClassLoader {
 
   public Class loadClass(String className) {
     Class result = null;
+    System.out.println("Loading class:"+className);
+    Thread.currentThread().setContextClassLoader(classLoader); 
     try {
       result = Class.forName(className, true, classLoader);
     }
@@ -64,6 +66,17 @@ public class SyslogNgClassLoader {
       System.out.println("Error: " + e.getMessage());
       e.printStackTrace(System.err);
     }
+    catch (Exception e) {
+      System.out.println("Unknown Exception: " + e.getMessage());
+      e.printStackTrace(System.err);
+    }
+    catch (Error e) {
+      System.out.println("Unknown Error: " + e.getMessage());
+      e.printStackTrace(System.err);
+    }
+
+    if (result == null)
+       System.out.println("forName returned null!!!");
     return result;
   }
 }
